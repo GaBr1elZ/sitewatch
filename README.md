@@ -58,14 +58,6 @@ A infraestrutura foi desenhada para rodar verificações ininterruptas sem trava
 2. **Monitoramento em Massa:** Estruturação assíncrona das checagens HTTP para evitar gargalos caso centenas de sites entrem na fila de monitoramento no mesmo minuto.
 3. **Gestão de Incidentes:** Criação de uma lógica inteligente para abrir um "Incidente" (Site Caiu) e fechá-lo automaticamente quando o site voltar a responder com status `200 OK`.
 
-## 📸 Preview da Aplicação
-
-*(Espaço reservado para as imagens do projeto - recomendo adicionar capturas de tela do Dashboard e Tela de Login)*
-
-<div align="center">
-  <!-- <img src="link_para_imagem.png" width="800" /> -->
-</div>
-
 ---
 <p align="center">
   👨‍💻 Desenvolvido com dedicação por <strong>Gabriel</strong>. <br>
