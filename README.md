@@ -4,124 +4,70 @@
   <img src="https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white" alt="Prisma" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
 </div>
 
 <h1 align="center">🚀 SiteWatch</h1>
 
 <p align="center">
-  <strong>Uma plataforma completa de monitoramento de uptime e performance de sites.</strong>
+  <strong>Plataforma SaaS Fullstack para Monitoramento de Uptime e Performance.</strong>
 </p>
-
-## 📋 Sobre o Projeto
-
-O **SiteWatch** é uma solução robusta (SaaS) construída para monitorar a disponibilidade de aplicações web em tempo real. Ele permite que os usuários cadastrem seus sites, definam intervalos de checagem e visualizem métricas detalhadas através de um dashboard interativo. O sistema também suporta alertas automatizados via webhook (Discord/Slack) e e-mail (Resend) quando um incidente é detectado.
-
-Este projeto foi desenvolvido com foco em performance, escalabilidade e uma interface de usuário impecável, servindo como uma excelente demonstração de arquitetura fullstack moderna.
-
-## ✨ Funcionalidades Principais
-
-- 🔐 **Autenticação Segura:** Sistema de login e registro utilizando JWT e criptografia bcrypt.
-- 📊 **Dashboard Analítico:** Visualização de dados e histórico de uptime utilizando gráficos dinâmicos (Recharts).
-- ⚙️ **Gestão de Sites:** CRUD completo para gerenciar os sites que serão monitorados, com personalização de intervalos de ping.
-- 🚨 **Sistema de Alertas:** Notificações em tempo real sobre quedas de serviço integradas com Webhooks (Slack/Discord) e E-mails (via Resend).
-- 🕒 **Monitoramento Automatizado:** Cron jobs precisos rodando no backend para verificar a integridade de todas as URLs cadastradas de forma ininterrupta.
-
-## 🛠️ Tecnologias Utilizadas
-
-**Frontend:**
-- [Next.js 15+](https://nextjs.org/) (App Router)
-- [React 19](https://react.dev/)
-- [Tailwind CSS v4](https://tailwindcss.com/)
-- [Recharts](https://recharts.org/) para visualização de dados
-- [Axios](https://axios-http.com/) para comunicação HTTP
-
-**Backend:**
-- [Node.js](https://nodejs.org/) & [Express](https://expressjs.com/)
-- [Prisma ORM](https://www.prisma.io/) com PostgreSQL
-- [TypeScript](https://www.typescriptlang.org/) para tipagem estática
-- [node-cron](https://github.com/node-cron/node-cron) para agendamento de tarefas
-- [Resend](https://resend.com/) para envio de e-mails transacionais
-- [JSON Web Tokens (JWT)](https://jwt.io/) para segurança
-
-## 🚀 Como Executar o Projeto Localmente
-
-Para rodar este projeto na sua máquina, você precisará do [Node.js](https://nodejs.org/) e de um banco de dados **PostgreSQL** rodando.
-
-### 1. Clonando o repositório
-
-```bash
-git clone https://github.com/SEU_USUARIO/sitewatch.git
-cd sitewatch
-```
-
-### 2. Configurando o Backend
-
-Navegue até a pasta do backend e instale as dependências:
-
-```bash
-cd backend
-npm install
-```
-
-Crie um arquivo `.env` na pasta `backend/` seguindo o modelo `.env.example`:
-*(Não se preocupe, as chaves reais não são versionadas por segurança).*
-
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/sitewatch"
-DIRECT_URL="postgresql://user:password@localhost:5432/sitewatch"
-JWT_SECRET="sua_chave_secreta_super_segura"
-RESEND_API_KEY="sua_chave_do_resend"
-PORT=3001
-```
-
-Execute as migrations do banco de dados e inicie o servidor:
-
-```bash
-npx prisma migrate dev
-npm run dev
-```
-
-### 3. Configurando o Frontend
-
-Em um novo terminal, vá para a pasta do frontend e instale as dependências:
-
-```bash
-cd frontend
-npm install
-```
-
-Crie um arquivo `.env.local` na pasta `frontend/`:
-
-```env
-NEXT_PUBLIC_API_URL="http://localhost:3001"
-```
-
-Inicie o servidor de desenvolvimento:
-
-```bash
-npm run dev
-```
-
-### 4. Acessando a Aplicação
-
-Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o resultado.
-
-## 📂 Estrutura do Projeto
-
-O projeto é configurado como um monorepo simples, separando claramente as responsabilidades:
-
-- `/frontend` - Contém toda a aplicação Next.js, componentes visuais e páginas.
-- `/backend` - Contém a API Express, rotas, lógica de agendamento (cron) e acesso ao banco (Prisma).
-
-## 💡 Próximos Passos (Roadmap)
-
-- [ ] Implementar páginas de status públicas (Status Pages) para os usuários compartilharem com seus clientes.
-- [ ] Adicionar suporte a times/organizações.
-- [ ] Internacionalização (i18n) para múltiplos idiomas.
 
 ---
 
+## 🎯 Sobre o Projeto
+
+O **SiteWatch** é uma aplicação completa de monitoramento (estilo SaaS) desenvolvida para garantir que serviços web estejam sempre disponíveis. O sistema realiza verificações de integridade automáticas e contínuas (pings) em URLs cadastradas e alerta os usuários imediatamente em caso de quedas ou instabilidades.
+
+Este projeto foi construído para ser o **pilar do meu portfólio**, demonstrando minha capacidade de arquitetar, desenvolver e estruturar uma aplicação fullstack moderna do zero, lidando com tarefas assíncronas (cron jobs), segurança, comunicação via API e desenvolvimento de interfaces responsivas e focadas em dados.
+
+## 🏗️ Arquitetura e Tecnologias
+
+A aplicação segue uma arquitetura baseada em **Microsserviços/Monorepo**, dividida de forma clara entre Frontend e Backend, permitindo escalabilidade e manutenção independentes. 
+
+Toda a base de código foi escrita utilizando **TypeScript**, garantindo segurança de tipos de ponta a ponta.
+
+### 🎨 Frontend (Client-Side)
+
+A interface do usuário foi projetada para ser limpa, intuitiva e apresentar dados complexos de forma simples.
+
+- **Next.js 15 (App Router):** Escolhido pelo poder da renderização híbrida (SSR/SSG), rotas aninhadas simplificadas e otimização pesada de performance out-of-the-box.
+- **React 19:** Utilização massiva de Server Components e Hooks modernos para lidar com estado global e requisições no client.
+- **Tailwind CSS v4:** Para estilização rápida, responsiva e altamente customizável diretamente no JSX, sem a necessidade de arquivos CSS separados (CSS-in-JS).
+- **Recharts:** Biblioteca poderosa utilizada para criar gráficos dinâmicos de uptime, histórico de respostas e métricas de latência no dashboard.
+- **Axios:** Gerenciador de requisições HTTP configurado com interceptors para o envio transparente de tokens JWT (Authorization) para o backend.
+
+### ⚙️ Backend (Server-Side & Cron Jobs)
+
+A infraestrutura foi desenhada para rodar verificações ininterruptas sem travar a thread principal do Node.
+
+- **Node.js + Express:** Estrutura rápida e minimalista para a criação de rotas RESTful focadas na gestão dos usuários, cadastro de sites e autenticação.
+- **Prisma ORM:** Abstração de banco de dados robusta e tipada. Utilizada por facilitar o relacionamento de tabelas (ex: Usuário -> Sites -> Incidentes).
+- **PostgreSQL:** Banco de dados relacional escolhido por sua alta confiabilidade, ideal para guardar grandes volumes de dados temporais de ping/uptime.
+- **node-cron:** Responsável pela engrenagem principal do projeto. Agenda e executa tarefas assíncronas de checagem em intervalos customizáveis (ex: a cada 1, 5 ou 15 minutos).
+- **Segurança (bcrypt + JWT):** Todo o fluxo de autenticação é blindado utilizando hashes fortes para senhas e tokens com expiração definida para persistência de sessão.
+
+### 🌐 Integrações & Notificações
+
+- **Resend API:** Integrado para o disparo rápido e confiável de e-mails transacionais (ex: e-mail alertando que um site caiu).
+- **Webhooks (Discord / Slack):** Módulo construído para suportar endpoints externos, enviando um JSON com o payload formatado diretamente para os canais de comunicação dos times.
+
+## 💡 Desafios Resolvidos
+
+1. **Agendamento Dinâmico:** Implementar um sistema onde o backend consegue gerenciar múltiplos sites rodando rotinas (crons) independentes baseadas na configuração individual escolhida pelo usuário.
+2. **Monitoramento em Massa:** Estruturação assíncrona das checagens HTTP para evitar gargalos caso centenas de sites entrem na fila de monitoramento no mesmo minuto.
+3. **Gestão de Incidentes:** Criação de uma lógica inteligente para abrir um "Incidente" (Site Caiu) e fechá-lo automaticamente quando o site voltar a responder com status `200 OK`.
+
+## 📸 Preview da Aplicação
+
+*(Espaço reservado para as imagens do projeto - recomendo adicionar capturas de tela do Dashboard e Tela de Login)*
+
+<div align="center">
+  <!-- <img src="link_para_imagem.png" width="800" /> -->
+</div>
+
+---
 <p align="center">
-  Desenvolvido por <strong>Você</strong>. <br>
-  <em>Sinta-se livre para entrar em contato ou contribuir!</em>
+  👨‍💻 Desenvolvido com dedicação por <strong>Gabriel</strong>. <br>
+  Acesse meu <a href="https://github.com/GaBr1elZ">GitHub</a> para mais projetos!
 </p>
