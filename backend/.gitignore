@@ -1,0 +1,9 @@
+# Generated files
+dist/
+generated/
+
+# Env
+.env
+
+# Dependencies
+node_modules/

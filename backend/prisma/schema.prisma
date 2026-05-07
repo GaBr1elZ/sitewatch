@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -----------------------------------------------
+// MODELS
+// -----------------------------------------------
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  plan      Plan      @default(FREE)
+  slug      String?   @unique  // usado na status page pública: /status/[slug]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  websites  Website[]
+}
+
+model Website {
+  id            String     @id @default(cuid())
+  name          String
+  url           String
+  userId        String
+  active        Boolean    @default(true)
+  alertEmail    Boolean    @default(true)   // enviar email ao cair/voltar
+  webhookUrl    String?                     // webhook Discord/Slack
+  checkInterval Int        @default(60)     // segundos: 60 (FREE) ou 30 (PRO)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pings         PingLog[]
+  incidents     Incident[]
+}
+
+model PingLog {
+  id          String   @id @default(cuid())
+  websiteId   String
+  status      Int      // HTTP status code: 200, 500, -1 (timeout/offline)
+  responseMs  Int      // Response time in milliseconds
+  isOnline    Boolean
+  checkedAt   DateTime @default(now())
+  website     Website  @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+}
+
+model Incident {
+  id          String    @id @default(cuid())
+  websiteId   String
+  startedAt   DateTime  @default(now())
+  resolvedAt  DateTime?               // null = incidente em aberto
+  durationMs  Int?                    // preenchido ao resolver
+  website     Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+}
+
+enum Plan {
+  FREE
+  PRO
+}
