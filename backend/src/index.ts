@@ -11,7 +11,23 @@ const app  = express();
 const PORT = process.env.PORT ?? 3001;
 
 // ── Middlewares ──────────────────────────────────────────
-app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:3000', credentials: true }));
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_APP_URL,
+].filter(Boolean) as string[];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: Postman, curl) e origens permitidas
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS bloqueado para origem: ${origin}`));
+    }
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 // ── Rotas ────────────────────────────────────────────────
