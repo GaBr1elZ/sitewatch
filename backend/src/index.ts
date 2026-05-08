@@ -11,18 +11,20 @@ const app  = express();
 const PORT = process.env.PORT ?? 3001;
 
 // ── Middlewares ──────────────────────────────────────────
-const allowedOrigins = [
-  'http://localhost:3000',
-  process.env.FRONTEND_URL,
-  process.env.NEXT_PUBLIC_APP_URL,
-].filter(Boolean) as string[];
-
 app.use(cors({
   origin: (origin, callback) => {
-    // Permite requisições sem origin (ex: Postman, curl) e origens permitidas
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
+    // Sem origin = Postman/curl → OK
+    if (!origin) return callback(null, true);
+
+    const allowed =
+      origin.startsWith('http://localhost') ||
+      origin.endsWith('.vercel.app')        ||
+      origin === process.env.FRONTEND_URL;
+
+    if (allowed) {
       callback(null, true);
     } else {
+      console.warn(`[CORS] bloqueado: ${origin}`);
       callback(new Error(`CORS bloqueado para origem: ${origin}`));
     }
   },
