@@ -223,7 +223,7 @@ export default function SiteDetailPage() {
                       <XAxis dataKey="i" hide />
                       <Tooltip
                         contentStyle={{ background: '#0c1825', border: '1px solid #1a2d45', borderRadius: 8, fontSize: 11 }}
-                        formatter={(v: number) => [`${v}ms`, 'Latência']}
+                        formatter={(v: any) => [`${v}ms`, 'Latência']}
                         labelFormatter={(_, p) => p[0]?.payload?.label ?? ''}
                       />
                       <Area type="monotone" dataKey="ms" stroke="#22d3ee" strokeWidth={2} fill="url(#grad)" dot={false} />
