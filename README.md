@@ -21,6 +21,8 @@ O **SiteWatch** é uma aplicação completa de monitoramento (estilo SaaS) desen
 
 Este projeto foi construído para ser o **pilar do meu portfólio**, demonstrando minha capacidade de arquitetar, desenvolver e estruturar uma aplicação fullstack moderna do zero, lidando com tarefas assíncronas (cron jobs), segurança, comunicação via API e desenvolvimento de interfaces responsivas e focadas em dados.
 
+🔗 Acesse a aplicação: https://sitewatch-app-eight.vercel.app/
+
 ## 🏗️ Arquitetura e Tecnologias
 
 A aplicação segue uma arquitetura baseada em **Microsserviços/Monorepo**, dividida de forma clara entre Frontend e Backend, permitindo escalabilidade e manutenção independentes. 
