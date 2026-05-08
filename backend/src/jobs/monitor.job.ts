@@ -16,7 +16,7 @@ async function pingWebsite(url: string): Promise<{ status: number; responseMs: n
       validateStatus: () => true,
     });
     const responseMs = Date.now() - start;
-    const isOnline   = response.status >= 200 && response.status < 400;
+    const isOnline = response.status < 500;
     return { status: response.status, responseMs, isOnline };
   } catch {
     return { status: -1, responseMs: Date.now() - start, isOnline: false };
@@ -36,7 +36,7 @@ async function checkWebsite(website: {
 }): Promise<void> {
   // Busca o último ping para detectar mudança de status
   const lastPing = await prisma.pingLog.findFirst({
-    where:   { websiteId: website.id },
+    where: { websiteId: website.id },
     orderBy: { checkedAt: 'desc' },
   });
 
@@ -86,7 +86,7 @@ async function checkWebsite(website: {
       const durationMs = Date.now() - openIncident.startedAt.getTime();
       await prisma.incident.update({
         where: { id: openIncident.id },
-        data:  { resolvedAt: new Date(), durationMs },
+        data: { resolvedAt: new Date(), durationMs },
       });
       console.log(`[CRON] ✅ Incidente fechado para ${website.name} (duração: ${Math.round(durationMs / 1000)}s)`);
 
@@ -113,15 +113,15 @@ async function runMonitoringCycle(): Promise<void> {
   const now = Date.now();
 
   const activeWebsites = await prisma.website.findMany({
-    where:  { active: true },
+    where: { active: true },
     select: {
-      id:            true,
-      url:           true,
-      name:          true,
-      alertEmail:    true,
-      webhookUrl:    true,
+      id: true,
+      url: true,
+      name: true,
+      alertEmail: true,
+      webhookUrl: true,
       checkInterval: true,
-      user:          { select: { email: true } },
+      user: { select: { email: true } },
     },
   });
 
@@ -134,9 +134,9 @@ async function runMonitoringCycle(): Promise<void> {
   const toCheck = await Promise.all(
     activeWebsites.map(async (w) => {
       const lastPing = await prisma.pingLog.findFirst({
-        where:   { websiteId: w.id },
+        where: { websiteId: w.id },
         orderBy: { checkedAt: 'desc' },
-        select:  { checkedAt: true },
+        select: { checkedAt: true },
       });
       if (!lastPing) return w; // nunca pingado → verificar agora
       const elapsed = now - lastPing.checkedAt.getTime();
