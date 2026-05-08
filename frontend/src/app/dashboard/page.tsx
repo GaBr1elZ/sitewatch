@@ -134,7 +134,7 @@ function LatencyChart({ pings }: { pings: Ping[] }) {
         </defs>
         <Tooltip
           contentStyle={{ background: '#0c1825', border: '1px solid #1a2d45', borderRadius: 8, fontSize: 11 }}
-          formatter={(v: number) => [`${v}ms`, 'Latência']}
+          formatter={(v: any) => [`${v}ms`, 'Latência']}
           labelFormatter={() => ''}
         />
         <Area type="monotone" dataKey="ms" stroke="#22d3ee" strokeWidth={1.5} fill="url(#lg)" dot={false} />
