@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { io } from 'socket.io-client';
 
 /* ─── Types ─────────────────────────────────────────── */
 type Ping = {
@@ -378,8 +379,22 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void loadData();
-    intervalRef.current = setInterval(() => void loadData(true), 60_000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    
+    // Configura WebSocket
+    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+    
+    socket.on('connect', () => {
+      console.log('[WS] Conectado ao servidor');
+    });
+
+    socket.on('website:updated', (data: { websiteId: string }) => {
+      console.log(`[WS] Site atualizado: ${data.websiteId}`);
+      void loadData(true); // Recarrega silenciosamente
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 

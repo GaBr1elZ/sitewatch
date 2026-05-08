@@ -2,6 +2,7 @@ import axios from 'axios';
 import cron from 'node-cron';
 import { prisma } from '../lib/prisma';
 import { sendDownAlert, sendUpAlert, sendWebhook } from '../lib/email';
+import { getIO } from '../lib/socket';
 
 /**
  * Faz ping em uma URL e retorna o status HTTP e o tempo de resposta em ms.
@@ -100,6 +101,14 @@ async function checkWebsite(website: {
         await sendWebhook(website.webhookUrl, website.name, website.url, true, durationMs);
       }
     }
+  }
+
+  // Notifica o frontend via WebSocket
+  try {
+    const io = getIO();
+    io.emit('website:updated', { websiteId: website.id });
+  } catch (err) {
+    // Silencioso se o socket não estiver pronto ainda
   }
 }
 

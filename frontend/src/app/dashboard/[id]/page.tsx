@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { io } from 'socket.io-client';
 
 /* ─── Types ──────────────────────────────────── */
 type Ping = { id: string; status: number; responseMs: number; isOnline: boolean; checkedAt: string };
@@ -85,24 +86,42 @@ export default function SiteDetailPage() {
 
   useEffect(() => { if (!isLoading && !token) router.replace('/login'); }, [isLoading, token, router]);
 
-  useEffect(() => {
+  const load = async (quiet = false) => {
     if (!token || !siteId) return;
-    const load = async () => {
-      try {
-        const res = await api.get<Website>(`/api/websites/${siteId}/detail`);
-        setSite(res.data);
+    if (!quiet) setLoading(true);
+    try {
+      const res = await api.get<Website>(`/api/websites/${siteId}/detail`);
+      setSite(res.data);
+      if (!quiet) {
         setFormName(res.data.name);
         setFormAlert(res.data.alertEmail);
         setFormWebhook(res.data.webhookUrl ?? '');
         setFormInterval(res.data.checkInterval);
-      } catch (e: unknown) {
-        const r = e as { response?: { status?: number } };
-        if (r.response?.status === 401) logout();
-        else setError('Erro ao carregar site.');
-      } finally { setLoading(false); }
-    };
+      }
+    } catch (e: unknown) {
+      const r = e as { response?: { status?: number } };
+      if (r.response?.status === 401) logout();
+      else setError('Erro ao carregar site.');
+    } finally { setLoading(false); }
+  };
+
+  useEffect(() => {
     void load();
-  }, [token, siteId, logout]);
+    
+    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+    
+    socket.on('website:updated', (data: { websiteId: string }) => {
+      if (data.websiteId === siteId) {
+        console.log(`[WS] Detalhes atualizados para o site: ${siteId}`);
+        void load(true);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, siteId]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
