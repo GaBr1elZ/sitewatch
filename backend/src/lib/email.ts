@@ -155,3 +155,76 @@ export async function sendWebhook(webhookUrl: string, name: string, url: string,
     console.error('[WEBHOOK] Falha ao enviar webhook:', err);
   }
 }
+
+// ──────────────────────────────────────────────
+// Weekly Report
+// ──────────────────────────────────────────────
+export type SiteReportSummary = {
+  name: string;
+  url: string;
+  uptime: number;
+  avgResponseMs: number;
+  totalIncidents: number;
+};
+
+function weeklyReportTemplate(userName: string, startDate: string, endDate: string, sites: SiteReportSummary[]): string {
+  const sitesHtml = sites.map(s => {
+    const uptimeColor = s.uptime >= 99 ? '#10b981' : s.uptime >= 95 ? '#fbbf24' : '#ef4444';
+    return `
+      <div style="background:#0a1420;border:1px solid #1a2d45;border-radius:10px;padding:16px;margin-bottom:12px;">
+        <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${s.name}</div>
+        <div style="font-size:13px;color:#22d3ee;margin-bottom:12px">${s.url}</div>
+        <div style="display:flex;gap:24px;">
+          <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Uptime</div><div style="font-size:16px;font-weight:700;color:${uptimeColor}">${s.uptime.toFixed(2)}%</div></div>
+          <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Latência</div><div style="font-size:16px;font-weight:700;color:#94a3b8">${s.avgResponseMs}ms</div></div>
+          <div><div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.05em">Quedas</div><div style="font-size:16px;font-weight:700;color:#94a3b8">${s.totalIncidents}</div></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html><html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{margin:0;padding:0;background:#060d16;font-family:'Segoe UI',Arial,sans-serif;color:#f1f5f9}
+  .wrap{max-width:560px;margin:40px auto;border:1px solid #1a2d45;border-radius:16px;overflow:hidden}
+  .top{background:#0a1420;border-bottom:1px solid #1a2d45;padding:24px 32px;text-align:center;}
+  .body{padding:32px}
+  .title{font-size:22px;font-weight:700;color:#f1f5f9;margin:0 0 8px}
+  .sub{font-size:15px;color:#94a3b8;line-height:1.6;margin:0 0 24px}
+  .cta{display:inline-block;background:#22d3ee;color:#0a1420;font-weight:700;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:16px}
+  .foot{padding:20px 32px;border-top:1px solid #1a2d45;font-size:12px;color:#334155;text-align:center}
+</style></head>
+<body><div class="wrap">
+  <div class="top">
+    <div style="font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#22d3ee">SiteWatch Weekly</div>
+  </div>
+  <div class="body">
+    <p class="title">Olá, ${userName}</p>
+    <p class="sub">Aqui está o seu relatório semanal de performance referente ao período de <strong>${startDate} a ${endDate}</strong>.</p>
+    ${sitesHtml}
+    <div style="text-align:center">
+      <a class="cta" href="${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/dashboard">Acessar Dashboard</a>
+    </div>
+  </div>
+  <div class="foot">SiteWatch · Monitoramento de uptime · <a href="#" style="color:#22d3ee">Desativar relatórios</a></div>
+</div></body></html>`;
+}
+
+export async function sendWeeklyReport(to: string, userName: string, startDate: string, endDate: string, sites: SiteReportSummary[]): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[EMAIL] Fake send weekly report to ${to}`);
+    return;
+  }
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `📊 Seu Relatório Semanal de Uptime — SiteWatch`,
+      html: weeklyReportTemplate(userName, startDate, endDate, sites),
+    });
+    console.log(`[EMAIL] Relatório semanal enviado para ${to}`);
+  } catch (err) {
+    console.error('[EMAIL] Falha ao enviar relatório semanal:', err);
+  }
+}

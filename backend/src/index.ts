@@ -8,6 +8,7 @@ import websiteRoutes  from './routes/website.routes';
 import incidentRoutes from './routes/incident.routes';
 import statusRoutes   from './routes/status.routes';
 import { startMonitoringJob } from './jobs/monitor.job';
+import { startReportJob } from './jobs/report.job';
 
 const app  = express();
 const httpServer = createServer(app);
@@ -50,6 +51,7 @@ app.use('/api/status',    statusRoutes);   // público
 httpServer.listen(PORT, () => {
   console.log(`🚀 SiteWatch Backend em http://localhost:${PORT}`);
   startMonitoringJob();
+  startReportJob();
 });
 
 export default app;
