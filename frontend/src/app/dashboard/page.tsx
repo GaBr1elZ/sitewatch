@@ -379,17 +379,48 @@ export default function DashboardPage() {
 
   useEffect(() => {
     void loadData();
+    if (!token) return;
     
     // Configura WebSocket
-    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001', {
+      auth: { token }
+    });
     
     socket.on('connect', () => {
       console.log('[WS] Conectado ao servidor');
     });
 
-    socket.on('website:updated', (data: { websiteId: string }) => {
+    socket.on('website:updated', (data: { websiteId: string; ping: Ping }) => {
       console.log(`[WS] Site atualizado: ${data.websiteId}`);
-      void loadData(true); // Recarrega silenciosamente
+      
+      // Atualização otimista em memória (evita N+1 queries pro backend a cada 30s)
+      setWebsites(prev => prev.map(w => {
+        if (w.id === data.websiteId) {
+          const newPings = [data.ping, ...w.pings].slice(0, 30);
+          return { ...w, pings: newPings };
+        }
+        return w;
+      }));
+
+      setStats(prev => {
+        const s = prev[data.websiteId];
+        if (!s) return prev;
+        
+        const newTotal = s.totalChecks + 1;
+        const newOnline = s.onlineChecks + (data.ping.isOnline ? 1 : 0);
+        // Aproxima a nova média considerando o histórico total + o novo ping
+        const newAvgMs = Math.round((s.avgResponseMs * s.totalChecks + data.ping.responseMs) / newTotal);
+        
+        return {
+          ...prev,
+          [data.websiteId]: {
+            totalChecks: newTotal,
+            onlineChecks: newOnline,
+            uptimePercentage: newTotal > 0 ? (newOnline / newTotal) * 100 : 100,
+            avgResponseMs: newAvgMs,
+          }
+        };
+      });
     });
 
     return () => {

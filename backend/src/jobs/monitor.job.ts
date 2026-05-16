@@ -8,20 +8,31 @@ import { getIO } from '../lib/socket';
  * Faz ping em uma URL e retorna o status HTTP e o tempo de resposta em ms.
  * Retorna status -1 se o site estiver offline/inacessível.
  */
-async function pingWebsite(url: string): Promise<{ status: number; responseMs: number; isOnline: boolean }> {
-  const start = Date.now();
-  try {
-    const response = await axios.get(url, {
-      timeout: 10_000,
-      maxRedirects: 5,
-      validateStatus: () => true,
-    });
-    const responseMs = Date.now() - start;
-    const isOnline = response.status < 500;
-    return { status: response.status, responseMs, isOnline };
-  } catch {
-    return { status: -1, responseMs: Date.now() - start, isOnline: false };
+async function pingWebsite(url: string, retries = 1): Promise<{ status: number; responseMs: number; isOnline: boolean }> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const start = Date.now();
+    try {
+      const response = await axios.get(url, {
+        timeout: 10_000,
+        maxRedirects: 5,
+        validateStatus: () => true,
+      });
+      const responseMs = Date.now() - start;
+      const isOnline = response.status >= 200 && response.status < 400; // Apenas 2xx e 3xx são online
+      
+      // Se deu sucesso, ou se já é a última tentativa
+      if (isOnline || attempt === retries) {
+        return { status: response.status, responseMs, isOnline };
+      }
+    } catch {
+      if (attempt === retries) {
+        return { status: -1, responseMs: Date.now() - start, isOnline: false };
+      }
+    }
+    // Aguarda 2s antes do retry
+    await new Promise((r) => setTimeout(r, 2000));
   }
+  return { status: -1, responseMs: 0, isOnline: false };
 }
 
 /**
@@ -31,6 +42,7 @@ async function checkWebsite(website: {
   id: string;
   url: string;
   name: string;
+  userId: string;
   alertEmail: boolean;
   webhookUrl: string | null;
   user: { email: string };
@@ -43,8 +55,7 @@ async function checkWebsite(website: {
 
   const { status, responseMs, isOnline } = await pingWebsite(website.url);
 
-  // Salva o novo ping
-  await prisma.pingLog.create({
+  const newPing = await prisma.pingLog.create({
     data: { websiteId: website.id, status, responseMs, isOnline },
   });
 
@@ -106,7 +117,10 @@ async function checkWebsite(website: {
   // Notifica o frontend via WebSocket
   try {
     const io = getIO();
-    io.emit('website:updated', { websiteId: website.id });
+    io.to(`user_${website.userId}`).emit('website:updated', { 
+      websiteId: website.id,
+      ping: newPing
+    });
   } catch (err) {
     // Silencioso se o socket não estiver pronto ainda
   }
@@ -127,6 +141,7 @@ async function runMonitoringCycle(): Promise<void> {
       id: true,
       url: true,
       name: true,
+      userId: true,
       alertEmail: true,
       webhookUrl: true,
       checkInterval: true,

@@ -108,12 +108,20 @@ export default function SiteDetailPage() {
   useEffect(() => {
     void load();
     
-    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+    if (!token) return;
+    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001', {
+      auth: { token }
+    });
     
-    socket.on('website:updated', (data: { websiteId: string }) => {
+    socket.on('website:updated', (data: { websiteId: string; ping: Ping }) => {
       if (data.websiteId === siteId) {
         console.log(`[WS] Detalhes atualizados para o site: ${siteId}`);
-        void load(true);
+        setSite(prev => {
+          if (!prev) return prev;
+          // Mantém os últimos 100 pings para o gráfico e barras
+          const newPings = [data.ping, ...prev.pings].slice(0, 100);
+          return { ...prev, pings: newPings };
+        });
       }
     });
 
